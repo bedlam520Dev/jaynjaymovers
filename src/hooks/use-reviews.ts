@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { MOCK_REVIEWS, USE_MOCK_DATA } from "@/lib/mock-data";
-import type { Review } from "@/types";
+import { createClient } from '@/lib/supabase/client';
+import type { Review } from '@/types';
+import { useEffect, useState } from 'react';
 
 export function useReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -11,24 +10,19 @@ export function useReviews() {
 
   useEffect(() => {
     (async () => {
-      if (USE_MOCK_DATA) {
-        setReviews(MOCK_REVIEWS);
-        setLoading(false);
-        return;
-      }
       try {
         const supabase = createClient();
         const { data, error } = await supabase
-          .from("reviews")
-          .select("*")
-          .order("created_at", { ascending: false });
-        if (error || !data || data.length === 0) {
-          setReviews(MOCK_REVIEWS);
+          .from('reviews')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error || !data) {
+          setReviews([]);
         } else {
           setReviews(data as Review[]);
         }
       } catch {
-        setReviews(MOCK_REVIEWS);
+        setReviews([]);
       } finally {
         setLoading(false);
       }

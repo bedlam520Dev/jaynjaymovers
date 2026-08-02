@@ -1,0 +1,35 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@basecn": "https://basecn.dev/r/{name}.json",
+    "@svgl": "https://svgl.app/r/{name}.json",
+    "@react-bits": "https://reactbits.dev/r/{name}.json",
+    "@soralabs": "https://ui.soralabs.io.vn/r/{name}.json",
+    "@supabase": "https://supabase.com/ui/r/{name}.json",
+    "@shadcn-editor": "https://raw.githubusercontent.com/htmujahid/shadcn-editor/refs/heads/main/public/r/{name}.json",
+    "@threecn": "https://threecn.dev/r/{name}.json",
+    "@shadcnmaps": "https://shadcnmaps.com/r/{name}.json",
+    "@lucide-animated": "https://lucide-animated.com/r/{name}.json"
+  }
+}

@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2023",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -25,9 +21,16 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/fonts": ["./src/app/fonts/*"],
+      "@/types": ["./src/types/*"],
+      "@/components": ["./src/components/*"],
+      "@/components/ui": ["./src/components/ui/*"],
+      "@/pages": ["./src/app/*"],
+      "@/hooks": ["./src/hooks/*"],
+      "@/lib": ["./src/lib/*"],
+      "@/utils": ["./src/utils/*"],
+      "@/contexts": ["./src/contexts/*"]
     }
   },
   "include": [
@@ -38,8 +41,19 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "e2e",
-    "storybook-static"
+    "node_modules/**/*",
+    "e2e/**/*",
+    "storybook-static/**/*",
+    "_dev/**/*",
+    "_devlogs/**/*",
+    ".storybook/**/*",
+    ".vscode/**/*",
+    ".kilo/**/*",
+    "src/components/**/*",
+    ".opencode/**/*",
+    "playwright-report/**/*",
+    "test-results/**/*",
+    "supabase/**/*",
+    "src/lib/__tests__/**/*"
   ]
 }

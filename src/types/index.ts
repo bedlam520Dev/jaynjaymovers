@@ -1,47 +1,47 @@
 export type ServiceType =
-  | "residential"
-  | "commercial"
-  | "long_distance"
-  | "packing"
-  | "storage"
-  | "specialty";
+  | 'residential'
+  | 'commercial'
+  | 'long_distance'
+  | 'packing'
+  | 'storage'
+  | 'specialty';
 
 export type HomeSize =
-  | "studio"
-  | "1br"
-  | "2br"
-  | "3br"
-  | "4br_plus"
-  | "office"
-  | "custom";
+  | 'studio'
+  | '1br'
+  | '2br'
+  | '3br'
+  | '4br_plus'
+  | 'office'
+  | 'custom';
 
 export type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "in_progress"
-  | "completed"
-  | "cancelled";
+  | 'pending'
+  | 'confirmed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled';
 
-export type QuoteStatus = "new" | "responded" | "converted" | "archived";
+export type QuoteStatus = 'new' | 'responded' | 'converted' | 'archived';
+
+export type Availability = 'open' | 'partial' | 'full' | 'none';
 
 export type PaymentMethod =
-  | "stripe"
-  | "paypal"
-  | "cashapp"
-  | "googlepay"
-  | "applepay"
-  | "zelle"
-  | "crypto"
-  | "cash"
-  | "check";
+  | 'credit_card'
+  | 'crypto'
+  | 'google_pay'
+  | 'apple_pay'
+  | 'paypal'
+  | 'cashapp'
+  | 'zelle';
 
-export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 
-export type ReviewSource = "google" | "yelp" | "trustadvisor" | "internal";
+export type ReviewSource = 'google' | 'yelp' | 'trustadvisor' | 'internal';
 
-export type TimeWindow = "08:00-12:00" | "12:00-16:00" | "16:00-20:00";
+export type TimeWindow = '08:00-12:00' | '12:00-16:00' | '16:00-20:00' | '20:00-24:00';
 
-export type AuthProvider = "email" | "google" | "github" | "apple";
+export type AuthProvider = 'email' | 'google' | 'apple';
 
 export interface Profile {
   id: string;
@@ -135,3 +135,49 @@ export interface EstimateBreakdown {
   total: number;
   lineItems: { label: string; amount: number }[];
 }
+
+export interface FloatingBackgroundAsset {
+  src: string;
+  alt: string;
+  height: number;
+  width: number;
+  className: string;
+  loading: string;
+}
+
+export interface FormState {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export type ServiceCard = {
+  key: string;
+  label: string;
+  icon: React.ElementType;
+  description: string;
+  features: string[];
+  priceFrom: number;
+  priceLabel: string;
+};
+
+export type Stat = {
+  value: string;
+  label: string;
+  icon: React.ElementType;
+};
+
+export type Value = {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+};
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+};

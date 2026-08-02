@@ -1,31 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { calculateEstimate } from "@/lib/mock-data";
-import type { ServiceType, HomeSize } from "@/types";
+import { calculateEstimate } from '@/lib/pricing';
+import { quoteSchema } from '@/lib/schemas/api';
+import { createClient } from '@/lib/supabase/server';
+import type { ServiceType, HomeSize } from '@/types';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      service_type,
-      home_size,
-      moving_date,
-      origin_address,
-      destination_address,
-      contact_name,
-      contact_phone,
-      contact_email,
-      notes,
-    } = body;
+    const validated = quoteSchema.parse(body);
 
-    if (!service_type || !home_size || !origin_address || !contact_name || !contact_phone || !contact_email) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    const estimate = calculateEstimate(service_type as ServiceType, home_size as HomeSize);
+    const estimate = calculateEstimate(validated.service_type, validated.home_size);
 
     const supabase = await createClient();
     const {
@@ -34,20 +18,20 @@ export async function POST(request: NextRequest) {
 
     const insertData = {
       user_id: user?.id ?? null,
-      service_type,
-      home_size,
-      moving_date: moving_date || null,
-      origin_address,
-      destination_address: destination_address || "",
-      contact_name,
-      contact_phone,
-      contact_email,
-      notes: notes || "",
-      status: "new",
+      service_type: validated.service_type,
+      home_size: validated.home_size,
+      moving_date: validated.moving_date || null,
+      origin_address: validated.origin_address,
+      destination_address: validated.destination_address || '',
+      contact_name: validated.contact_name,
+      contact_phone: validated.contact_phone,
+      contact_email: validated.contact_email,
+      notes: validated.notes || '',
+      status: 'new',
     };
 
     const { data, error } = await supabase
-      .from("quote_requests")
+      .from('quote_requests')
       .insert(insertData)
       .select()
       .single();
@@ -56,11 +40,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { quote: data, estimate },
-      { status: 201 },
-    );
-  } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ quote: data, estimate }, { status: 201 });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'ZodError') {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

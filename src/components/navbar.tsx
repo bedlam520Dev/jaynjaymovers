@@ -1,137 +1,180 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Truck, Menu, X, LayoutDashboard, LogOut, Calendar, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/hooks/use-auth";
-import { NAV_LINKS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { useAuthModal } from '@/components/auth-modals/AuthModalProvider';
+import { ModeToggle } from '@/components/ModeToggle';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MenuIcon } from '@/components/ui/menu';
+import { ShieldCheckIcon } from '@/components/ui/shield-check';
+import { XIcon } from '@/components/ui/x';
+import { useAuth } from '@/hooks/use-auth';
+import { NAV_LINKS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { LayoutDashboard, LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function Navbar() {
   const { user, profile, signOut } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { openLogin } = useAuthModal();
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/");
+    router.push('/');
+    setMenuOpen(false);
   };
 
   const initials = profile?.full_name
-    ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "U";
+    ? profile.full_name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'U';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
-            <Truck className="h-5 w-5" />
-          </div>
-          <span className="font-display text-xl font-bold tracking-tight">Summit Movers</span>
-        </Link>
+    <header className='navbar'>
+      <div className='navbar-inner'>
+        <div className='absolute top-3 right-3 z-55'>
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label='Toggle menu'
+            aria-expanded={menuOpen}
+            className={cn(
+              'flex items-center justify-center self-center h-[clamp(3rem,6vh,6rem)] w-[clamp(3rem,6vh,6rem)]',
+              'z-56 rounded-[1.25rem] border-4 border-primary bg-background/60 p-1.5 text-xl font-bold text-primary transition-all duration-200 ease-out',
+              'hover:scale-105 hover:border-primary/60 active:scale-95',
+              menuOpen && 'scale-95 border-primary bg-background/60 shadow-md'
+            )}
+          >
+            {menuOpen ? (
+              <XIcon className='h-[clamp(1rem,1.75vh,1.75rem)] w-[clamp(1rem,1.75vh,1.75rem)] stroke-5' />
+            ) : (
+              <MenuIcon className='h-[clamp(1rem,1.75vh,1.75rem)] w-[clamp(1rem,1.75vh,1.75rem)] stroke-5' />
+            )}
+          </button>
 
-        <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent/10 hover:text-accent-foreground",
-                pathname === link.href && "text-primary bg-primary/5",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")}>
-                <LayoutDashboard className="h-4 w-4" /> Dashboard
-              </Button>
-              {profile?.is_admin && (
-                <Button variant="ghost" size="sm" onClick={() => router.push("/admin")}>
-                  <Shield className="h-4 w-4" /> Admin
-                </Button>
-              )}
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:bg-accent/10 transition-colors"
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{profile?.full_name?.split(" ")[0] || "Account"}</span>
-              </button>
-            </div>
-          ) : (
+          {menuOpen && (
             <>
-              <Button variant="ghost" asChild size="sm">
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/signup">Get Started</Link>
-              </Button>
+              <div
+                className='fixed inset-0 z-40 cursor-default'
+                aria-hidden
+                onClick={() => setMenuOpen(false)}
+              />
+
+              <div className='absolute top-full right-0 mt-2 z-50 flex w-72 flex-col gap-1.5 rounded-xl border border-muted bg-background/95 p-2.5 shadow-xl backdrop-blur-2xl duration-200 animate-in fade-in slide-in-from-top-2'>
+                <div className='px-2 py-0.5 text-[10px] font-bold tracking-wider text-muted-foreground/80 uppercase'>
+                  Navigation
+                </div>
+
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      'flex h-10 cursor-pointer items-center rounded-lg border border-transparent bg-background/60 px-3 text-sm font-medium text-foreground transition-all duration-150 hover:translate-x-0.5 hover:border-primary/80 hover:bg-background/80 active:scale-98',
+                      pathname === link.href &&
+                        'border-primary/60 bg-background/60 text-primary shadow-xs'
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+
+                <div className='relative my-1.5 flex items-center px-1'>
+                  <div className='w-full border-t border-muted-foreground/15' />
+                </div>
+
+                {user ? (
+                  <>
+                    <div className='px-2 py-0.5 text-[10px] font-bold tracking-wider text-muted-foreground/80 uppercase'>
+                      Account Panel
+                    </div>
+
+                    <Link
+                      href='/dashboard'
+                      onClick={() => setMenuOpen(false)}
+                      className={cn(
+                        'flex h-10 items-center gap-2.5 rounded-lg border border-transparent bg-background/60 px-3 text-sm font-medium transition-all hover:translate-x-0.5 hover:border-primary/80 hover:bg-background/80 active:scale-98',
+                        pathname === '/dashboard' &&
+                          'border-primary/60 bg-background/60 text-primary'
+                      )}
+                    >
+                      <LayoutDashboard className='h-4 w-4 stroke-2' /> Dashboard
+                    </Link>
+
+                    {profile?.is_admin && (
+                      <Link
+                        href='/admin-dashboard'
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          'flex h-10 items-center gap-2.5 rounded-lg border border-transparent bg-background/60 px-3 text-sm font-medium transition-all hover:translate-x-0.5 hover:border-primary/80 hover:bg-background/80 active:scale-98',
+                          pathname === '/admin-dashboard' &&
+                            'border-primary/80 bg-background/80 text-primary'
+                        )}
+                      >
+                        <ShieldCheckIcon className='h-4 w-4 stroke-2' /> Admin CRM
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={handleSignOut}
+                      className='flex h-10 cursor-pointer items-center gap-2.5 rounded-lg border border-transparent bg-destructive/5 px-3 text-left text-sm font-medium text-destructive transition-all hover:translate-x-0.5 hover:border-destructive/40 hover:bg-destructive/20 active:scale-98'
+                    >
+                      <LogOut className='h-4 w-4 stroke-2' /> Sign Out
+                    </button>
+
+                    <div className='my-1 border-t border-muted-foreground/10' />
+
+                    <div className='flex items-center gap-2.5 rounded-lg bg-muted/30 p-1.5'>
+                      <Avatar className='h-8 w-8 border border-primary/60'>
+                        {profile?.avatar_url && (
+                          <AvatarImage src={profile?.avatar_url} />
+                        )}
+                        <AvatarFallback className='bg-primary/20 text-xs font-bold text-background'>
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className='flex min-w-0 flex-col'>
+                        <span className='truncate text-xs font-bold leading-tight text-foreground'>
+                          {profile?.full_name ||
+                            (profile?.is_admin ? 'Admin Account' : 'User Account')}
+                        </span>
+                        <span className='mt-0.5 truncate text-[10px] font-medium leading-none text-muted-foreground'>
+                          Signed In
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className='flex flex-col gap-1.5 pt-0.5'>
+                    <button
+                      onClick={openLogin}
+                      className='flex h-9 w-full items-center justify-center rounded-lg border border-muted bg-background/60 text-sm font-medium transition-all hover:scale-[1.01] hover:border-primary/80 hover:bg-background/80 active:scale-98'
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )}
+
+                <div className='my-1 border-t border-muted-foreground/10' />
+
+                <div className='flex items-center justify-between px-2 py-0.5'>
+                  <span className='text-[10px] font-bold text-muted-foreground/80 uppercase'>
+                    Theme
+                  </span>
+                  <ModeToggle />
+                </div>
+              </div>
             </>
           )}
         </div>
-
-        <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
       </div>
-
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border/40 bg-background animate-fade-in">
-          <div className="container mx-auto py-4 px-4 flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent/10"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="h-px bg-border my-2" />
-            {user ? (
-              <>
-                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent/10 flex items-center gap-2">
-                  <LayoutDashboard className="h-4 w-4" /> Dashboard
-                </Link>
-                {profile?.is_admin && (
-                  <Link href="/admin" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent/10 flex items-center gap-2">
-                    <Shield className="h-4 w-4" /> Admin CRM
-                  </Link>
-                )}
-                <button onClick={handleSignOut} className="rounded-md px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 flex items-center gap-2 text-left">
-                  <LogOut className="h-4 w-4" /> Sign Out
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" asChild className="flex-1">
-                  <Link href="/login" onClick={() => setMobileOpen(false)}>Sign In</Link>
-                </Button>
-                <Button asChild className="flex-1">
-                  <Link href="/signup" onClick={() => setMobileOpen(false)}>Get Started</Link>
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </header>
   );
 }

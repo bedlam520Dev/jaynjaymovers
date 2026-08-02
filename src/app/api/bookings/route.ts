@@ -1,24 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { calculateEstimate } from "@/lib/mock-data";
-import type { ServiceType, HomeSize, TimeWindow } from "@/types";
+import { calculateEstimate } from '@/lib/pricing';
+import { bookingSchema } from '@/lib/schemas/api';
+import { createClient } from '@/lib/supabase/server';
+import type { ServiceType, HomeSize, TimeWindow } from '@/types';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      service_type,
-      home_size,
-      moving_date,
-      time_window,
-      origin_address,
-      destination_address,
-      notes,
-    } = body;
-
-    if (!service_type || !home_size || !moving_date || !origin_address || !time_window) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    const validated = bookingSchema.parse(body);
 
     const supabase = await createClient();
     const {
@@ -26,23 +15,39 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const estimate = calculateEstimate(service_type as ServiceType, home_size as HomeSize);
+    const estimate = calculateEstimate(validated.service_type, validated.home_size);
+
+    const { data: reserved, error: reserveError } = await supabase.rpc('reserve_slot', {
+      slot_date: validated.moving_date,
+      slot_window: validated.time_window,
+    });
+
+    if (reserveError) {
+      return NextResponse.json({ error: reserveError.message }, { status: 500 });
+    }
+
+    if (!reserved) {
+      return NextResponse.json(
+        { error: 'That time window just filled up. Please pick another slot.' },
+        { status: 409 }
+      );
+    }
 
     const { data, error } = await supabase
-      .from("bookings")
+      .from('bookings')
       .insert({
         user_id: user.id,
-        service_type,
-        home_size,
-        moving_date,
-        time_window: time_window as TimeWindow,
-        origin_address,
-        destination_address: destination_address || "",
-        notes: notes || "",
-        status: "pending",
+        service_type: validated.service_type,
+        home_size: validated.home_size,
+        moving_date: validated.moving_date,
+        time_window: validated.time_window,
+        origin_address: validated.origin_address,
+        destination_address: validated.destination_address || '',
+        notes: validated.notes || '',
+        status: 'pending',
         estimated_cost: estimate.total,
         crew_size: estimate.crewSize,
       })
@@ -50,23 +55,19 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      await supabase.rpc('release_slot', {
+        slot_date: validated.moving_date,
+        slot_window: validated.time_window,
+      });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const { error: slotError } = await supabase
-      .from("time_slots")
-      .select("id, current_bookings, max_bookings")
-      .eq("date", moving_date)
-      .eq("time_window", time_window)
-      .maybeSingle();
-
-    if (!slotError) {
-      await supabase.rpc("increment_slot_booking", { slot_date: moving_date, slot_window: time_window }).then(() => {});
-    }
-
     return NextResponse.json({ booking: data, estimate }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'ZodError') {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -76,7 +77,21 @@ export async function PATCH(request: NextRequest) {
     const { booking_id, status } = body;
 
     if (!booking_id || !status) {
-      return NextResponse.json({ error: "Missing booking_id or status" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing booking_id or status' },
+        { status: 400 }
+      );
+    }
+
+    const validStatuses = [
+      'pending',
+      'confirmed',
+      'in_progress',
+      'completed',
+      'cancelled',
+    ];
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -85,32 +100,43 @@ export async function PATCH(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
       .maybeSingle();
 
-    const { data, error } = await supabase
-      .from("bookings")
-      .update({ status })
-      .eq("id", booking_id)
-      .select()
-      .single();
+    let query = supabase.from('bookings').update({ status }).eq('id', booking_id);
+
+    if (!profile?.is_admin) {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { data, error } = await query.select().maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (!profile?.is_admin && data.user_id !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Booking not found or access denied' },
+        { status: 404 }
+      );
+    }
+
+    if (status === 'cancelled' && data.status !== 'cancelled') {
+      await supabase.rpc('release_slot', {
+        slot_date: data.moving_date,
+        slot_window: data.time_window,
+      });
     }
 
     return NextResponse.json({ booking: data });
   } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

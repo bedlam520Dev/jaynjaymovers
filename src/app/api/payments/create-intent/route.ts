@@ -1,13 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createPaymentIntent, getProviderConfig } from '@/lib/payments';
+import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { amount, booking_id, method = "stripe" } = body;
+    const { amount, booking_id, method = 'credit_card' } = body;
 
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
+    }
+
+    const config = getProviderConfig(method);
+    if (!config.configured) {
+      return NextResponse.json(
+        {
+          clientSecret: null,
+          paymentIntentId: null,
+          provider: config.name,
+          message: config.message,
+        },
+        { status: 200 }
+      );
     }
 
     const supabase = await createClient();
@@ -16,58 +30,34 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const result = await createPaymentIntent({
+      amount,
+      booking_id,
+      method,
+      metadata: { user_id: user.id, method },
+    });
 
-    if (!stripeSecretKey) {
-      return NextResponse.json({
-        clientSecret: null,
-        paymentIntentId: null,
-        message: "Stripe not configured — set STRIPE_SECRET_KEY to enable live payments",
+    if (result.message) {
+      return NextResponse.json(result, { status: 200 });
+    }
+
+    if (result.paymentIntentId) {
+      await supabase.from('payments').insert({
+        user_id: user.id,
+        booking_id: booking_id || null,
+        amount,
+        method,
+        status: 'pending',
+        provider_payment_id: result.paymentIntentId,
       });
     }
 
-    const response = await fetch("https://api.stripe.com/v1/payment_intents", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${stripeSecretKey}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        amount: String(Math.round(amount * 100)),
-        currency: "usd",
-        "metadata[user_id]": user.id,
-        "metadata[booking_id]": booking_id || "",
-        "metadata[method]": method,
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      return NextResponse.json(
-        { error: err.error?.message ?? "Stripe error" },
-        { status: 502 },
-      );
-    }
-
-    const intent = await response.json();
-
-    await supabase.from("payments").insert({
-      user_id: user.id,
-      booking_id: booking_id || null,
-      amount,
-      method,
-      status: "pending",
-      provider_payment_id: intent.id,
-    });
-
-    return NextResponse.json({
-      clientSecret: intent.client_secret,
-      paymentIntentId: intent.id,
-    });
-  } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(result, { status: 200 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
