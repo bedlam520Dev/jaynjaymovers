@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "dev": "dotenvx run -f .env.development -- next dev",
-    "build": "dotenvx run -f .env.production -- next build",
+    "build": "if [ \"$OPENNEXT_INNER_BUILD\" = \"1\" ]; then dotenvx run -f .env.production -- next build; else OPENNEXT_INNER_BUILD=1 dotenvx run -f .env.production -- opennextjs-cloudflare build; fi",
     "start": "dotenvx run -f .env.production -- next start",
     "clean:nuke": "rm -rf .next tsconfig.tsbuildinfo node_modules pnpm-lock.yaml > _devlogs/clean/clean-nuke-$(date +%Y%m%d-%H%M%S).log 2>&1",
     "tschk": "tsc --noEmit > _devlogs/tschk/tschk-$(date +%Y%m%d-%H%M%S).log 2>&1",
