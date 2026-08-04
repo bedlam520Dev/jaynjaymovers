@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const newsletterSchema = z.object({
-  email: z.string().email('Invalid email address').max(254),
+  email: z.email('Invalid email address').max(254),
 });
 
 export const quoteSchema = z.object({
@@ -19,7 +19,7 @@ export const quoteSchema = z.object({
   destination_address: z.string().optional().nullable(),
   contact_name: z.string().min(1, 'Contact name is required'),
   contact_phone: z.string().min(1, 'Contact phone is required'),
-  contact_email: z.string().email('Invalid email address'),
+  contact_email: z.email('Invalid email address'),
   notes: z.string().optional().nullable(),
 });
 
@@ -42,7 +42,7 @@ export const bookingSchema = z.object({
 
 export const reviewSchema = z.object({
   author_name: z.string().min(1, 'Author name is required'),
-  rating: z.number().int().min(1).max(5),
+  rating: z.int().min(1).max(5),
   text: z.string().min(1, 'Review text is required'),
   source: z.enum(['google', 'yelp', 'trustadvisor', 'internal']).default('internal'),
 });
@@ -58,12 +58,12 @@ export const paymentSchema = z.object({
     'cashapp',
     'zelle',
   ]),
-  booking_id: z.string().uuid().optional().nullable(),
+  booking_id: z.uuid().optional().nullable(),
 });
 
 export const createIntentSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  booking_id: z.string().uuid().optional().nullable(),
+  booking_id: z.uuid().optional().nullable(),
   method: z
     .enum([
       'credit_card',

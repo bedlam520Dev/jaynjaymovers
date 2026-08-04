@@ -2,13 +2,13 @@
 
 import { Container, Grid } from '@/components/layout';
 import { useLegalOverlay } from '@/components/legal/LegalOverlayProvider';
-import { FacebookIcon } from '@/components/ui/facebook';
-import { InstagramIcon } from '@/components/ui/instagram';
-import { MailboxIcon } from '@/components/ui/mailbox';
-import { MapPinIcon } from '@/components/ui/map-pin';
-import { PhoneIcon } from '@/components/ui/phone';
-import { ShieldCheckIcon } from '@/components/ui/shield-check';
-import { TwitterIcon } from '@/components/ui/twitter';
+import { FacebookIcon } from '@/components/ui/lucide-animated/facebook';
+import { InstagramIcon } from '@/components/ui/lucide-animated/instagram';
+import { MailboxIcon } from '@/components/ui/lucide-animated/mailbox';
+import { MapPinIcon } from '@/components/ui/lucide-animated/map-pin';
+import { PhoneIcon } from '@/components/ui/lucide-animated/phone';
+import { ShieldCheckIcon } from '@/components/ui/lucide-animated/shield-check';
+import { TwitterIcon } from '@/components/ui/lucide-animated/twitter';
 import { useAuth } from '@/hooks/use-auth';
 import { SITE, LOGO } from '@/lib/constants';
 import Image from 'next/image';

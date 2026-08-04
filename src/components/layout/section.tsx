@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { createElement } from 'react';
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 type SectionProps<E extends ElementType = 'section'> = {
@@ -40,14 +41,14 @@ export function Section<E extends ElementType = 'section'>({
   background = 'none',
   ...props
 }: SectionProps<E>) {
-  const Component = as ?? 'section';
+  const Component = (as ?? 'section') as ElementType;
 
-  return (
-    <Component
-      className={cn(paddingMap[padding], backgroundMap[background], className)}
-      {...props}
-    >
-      {children}
-    </Component>
+  return createElement(
+    Component,
+    {
+      className: cn(paddingMap[padding], backgroundMap[background], className),
+      ...props,
+    },
+    children
   );
 }

@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 export type ServiceType =
   | 'residential'
   | 'commercial'
@@ -133,7 +135,7 @@ export interface EstimateBreakdown {
   truckFee: number;
   additionalFees: number;
   total: number;
-  lineItems: { label: string; amount: number }[];
+  lineItems: { label: string; amount: number; }[];
 }
 
 export interface FloatingBackgroundAsset {
@@ -156,7 +158,7 @@ export interface FormState {
 export type ServiceCard = {
   key: string;
   label: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   description: string;
   features: string[];
   priceFrom: number;
@@ -166,13 +168,13 @@ export type ServiceCard = {
 export type Stat = {
   value: string;
   label: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 };
 
 export type Value = {
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 };
 
 export type TeamMember = {

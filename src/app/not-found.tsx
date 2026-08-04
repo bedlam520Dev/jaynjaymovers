@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { TruckIcon } from '@/components/ui/truck';
+import { TruckIcon } from '@/components/ui/lucide-animated/truck';
 import Link from 'next/link';
 
 export default function NotFound() {

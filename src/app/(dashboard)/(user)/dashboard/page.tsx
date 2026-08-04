@@ -15,9 +15,9 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TruckIcon } from '@/components/ui/lucide-animated/truck';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { TruckIcon } from '@/components/ui/truck';
 import { useAuth } from '@/hooks/use-auth';
 import { useBookings } from '@/hooks/use-bookings';
 import { usePayments } from '@/hooks/use-payments';

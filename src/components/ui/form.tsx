@@ -115,7 +115,7 @@ function FormControl({ children = <div /> }: { children?: useRender.RenderProp }
       'data-slot': 'form-control',
       id: formItemId,
       'aria-describedby': !error
-        ? `${formDescriptionId}`
+        ? formDescriptionId
         : `${formDescriptionId} ${formMessageId}`,
       'aria-invalid': !!error,
     },

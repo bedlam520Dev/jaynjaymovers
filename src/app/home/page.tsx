@@ -10,7 +10,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { TruckIcon } from '@/components/ui/truck';
+import { TruckIcon } from '@/components/ui/lucide-animated/truck';
 import {
   SITE,
   HERO_IMAGE,

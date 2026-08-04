@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
+import { useRef, useState } from 'react';
 
 type FormState = 'idle' | 'sending' | 'success' | 'error';
 
@@ -8,9 +9,16 @@ export function ComingSoonForm() {
   const [email, setEmail] = useState('');
   const [state, setState] = useState<FormState>('idle');
   const [message, setMessage] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      setState('error');
+      setMessage('Please complete the security check first.');
+      return;
+    }
     setState('sending');
     setMessage('Sending...');
 
@@ -18,7 +26,7 @@ export function ComingSoonForm() {
       const response = await fetch('/api/coming-soon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstile_token: turnstileToken }),
       });
 
       const result = await response.json();
@@ -35,6 +43,7 @@ export function ComingSoonForm() {
       setMessage(
         error instanceof Error ? error.message : 'Oops! Something went wrong.'
       );
+      turnstileRef.current?.reset();
     }
   };
 
@@ -54,6 +63,11 @@ export function ComingSoonForm() {
           required
           aria-label='Email address'
           className='w-full rounded-[25px] border border-white/18 bg-[rgba(10,10,14,0.78)] px-4 py-3.5 text-base text-[#fdf7ef] shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-[10px] transition-colors placeholder:text-[#fdf7ef]/70 focus:outline-none focus:ring-2 focus:ring-white/35 focus:ring-offset-2 focus:ring-offset-transparent'
+        />
+        <TurnstileWidget
+          ref={turnstileRef}
+          action='coming-soon'
+          onTokenChange={setTurnstileToken}
         />
         <button
           type='submit'

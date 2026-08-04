@@ -1,6 +1,7 @@
 'use client';
 
 import { SlotMapModal } from '@/components/schedule/slot-map-modal';
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TruckIcon } from '@/components/ui/lucide-animated/truck';
 import {
   Select,
   SelectTrigger,
@@ -21,7 +23,6 @@ import {
   SelectContent,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { TruckIcon } from '@/components/ui/truck';
 import { useAuth } from '@/hooks/use-auth';
 import { useSchedule } from '@/hooks/use-schedule';
 import {
@@ -46,7 +47,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 function SelectOption({
@@ -116,6 +117,8 @@ export default function SchedulePage() {
   const [successOpen, setSuccessOpen] = useState(false);
   const [booking, setBooking] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
   const slotsByDate = useMemo(() => {
     const map = new Map<string, typeof slots>();
     for (const s of slots) {
@@ -153,6 +156,10 @@ export default function SchedulePage() {
       router.push('/auth/login?redirect=/schedule');
       return;
     }
+    if (!turnstileToken) {
+      toast.error('Please complete the security check first.');
+      return;
+    }
 
     setBooking(true);
     try {
@@ -167,6 +174,7 @@ export default function SchedulePage() {
           origin_address: fromAddress,
           destination_address: toAddress,
           notes,
+          turnstile_token: turnstileToken,
         }),
       });
 
@@ -177,12 +185,14 @@ export default function SchedulePage() {
           });
           setMapOpen(false);
           setSelectedSlot(null);
+          turnstileRef.current?.reset();
           return;
         }
         const data = await res.json().catch(() => ({}));
         toast.error('Booking failed', {
           description: data.error ?? 'Please try again.',
         });
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -638,25 +648,32 @@ export default function SchedulePage() {
                 </p>
               </div>
               {user ? (
-                <Button
-                  size='lg'
-                  className='bg-success/40 border-success/80 text-foreground/80 hover:bg-success/20 border-2 border-inset w-full'
-                  disabled={!canBook || booking}
-                  onClick={handleBook}
-                  nativeButton={false}
-                >
-                  {booking ? (
-                    <>
-                      <Loader2 className='h-4 w-4 animate-spin' />
-                      Booking…
-                    </>
-                  ) : (
-                    <>
-                      Book This Slot
-                      <ArrowRight className='h-4 w-4' />
-                    </>
-                  )}
-                </Button>
+                <>
+                  <TurnstileWidget
+                    ref={turnstileRef}
+                    action='schedule-booking'
+                    onTokenChange={setTurnstileToken}
+                  />
+                  <Button
+                    size='lg'
+                    className='bg-success/40 border-success/80 text-foreground/80 hover:bg-success/20 border-2 border-inset w-full'
+                    disabled={!canBook || booking}
+                    onClick={handleBook}
+                    nativeButton={false}
+                  >
+                    {booking ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                        Booking…
+                      </>
+                    ) : (
+                      <>
+                        Book This Slot
+                        <ArrowRight className='h-4 w-4' />
+                      </>
+                    )}
+                  </Button>
+                </>
               ) : (
                 <Button
                   size='lg'

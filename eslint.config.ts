@@ -24,8 +24,6 @@ const eslintConfig = [
       '_devlogs/**',
       '.vscode/**',
       '.kilo/**',
-      'src/app/editor/**/*',
-      'src/components/editor/**/*',
     ],
   },
 ];

@@ -43,7 +43,7 @@ export function useSchedule() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'time_slots' },
         (payload: SlotChangePayload) => {
-          const record = payload.new as Partial<TimeSlot>;
+          const record = payload.new;
           if (!record.date || !record.time_window) return;
           setSlots((prev) => {
             const idx = prev.findIndex(

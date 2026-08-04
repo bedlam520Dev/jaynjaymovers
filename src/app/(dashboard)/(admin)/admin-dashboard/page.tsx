@@ -20,6 +20,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { TruckIcon } from '@/components/ui/lucide-animated/truck';
 import {
   Select,
   SelectTrigger,
@@ -29,7 +30,6 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { TruckIcon } from '@/components/ui/truck';
 import { useAuth } from '@/hooks/use-auth';
 import { useBookings } from '@/hooks/use-bookings';
 import { usePayments } from '@/hooks/use-payments';

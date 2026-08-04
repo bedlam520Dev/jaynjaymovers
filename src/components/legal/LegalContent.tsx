@@ -49,13 +49,13 @@ const SectionText = ({ children }: { children: ReactNode }) => (
   <p className={`mt-2 ${sectionStyles}`}>{children}</p>
 );
 
-const SectionList = ({ items }: { items: string[] }) => (
+{/* const SectionList = ({ items }: { items: string[] }) => (
   <ul className={`mt-2 list-disc space-y-1 pl-6 ${sectionStyles}`}>
     {items.map((item) => (
       <li key={item}>{item}</li>
     ))}
   </ul>
-);
+); */}
 
 type LegalContentProps = { mode?: Mode };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,7 +41,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 // removed unused useRouter import
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function QuotePage() {
@@ -55,7 +56,10 @@ export default function QuotePage() {
   const [contactName, setContactName] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
 
   useEffect(() => {
     if (profile?.full_name) {
@@ -104,13 +108,50 @@ export default function QuotePage() {
     setStep((s) => Math.max(s - 1, 0));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isStepValid(2)) {
       toast.error('Please complete your contact information.');
       return;
     }
-    toast.success("Quote request submitted! We'll be in touch shortly.");
-    setSubmitted(true);
+    if (!turnstileToken) {
+      toast.error('Please complete the security check first.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_type: serviceType,
+          home_size: homeSize,
+          moving_date: moveDate || null,
+          origin_address: fromAddress,
+          destination_address: toAddress,
+          contact_name: contactName,
+          contact_phone: contactPhone,
+          contact_email: contactEmail,
+          notes: notes || null,
+          turnstile_token: turnstileToken,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? 'Quote request failed. Please try again.');
+        turnstileRef.current?.reset();
+        return;
+      }
+
+      toast.success("Quote request submitted! We'll be in touch shortly.");
+      setSubmitted(true);
+    } catch {
+      toast.error('Network error. Please try again.');
+      turnstileRef.current?.reset();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -599,6 +640,11 @@ export default function QuotePage() {
                           This is an estimate. Final pricing is confirmed when you
                           schedule your move.
                         </p>
+                        <TurnstileWidget
+                          ref={turnstileRef}
+                          action='quote-request'
+                          onTokenChange={setTurnstileToken}
+                        />
                       </div>
                     )}
                     <div className='flex items-center justify-between gap-4 pt-2'>
@@ -623,10 +669,11 @@ export default function QuotePage() {
                         <Button
                           onClick={handleSubmit}
                           size='lg'
+                          disabled={submitting}
                           className='bg-success/40 border-success/80 text-foreground/80 hover:bg-success/20 border-2 border-inset'
                         >
                           <Check className='mr-1' />
-                          Submit quote request
+                          {submitting ? 'Submitting...' : 'Submit quote request'}
                         </Button>
                       )}
                     </div>

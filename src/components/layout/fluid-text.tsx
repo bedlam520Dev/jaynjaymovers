@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { createElement } from 'react';
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 type FluidTextProps<E extends ElementType = 'p'> = {
@@ -34,19 +35,19 @@ export function FluidText<E extends ElementType = 'p'>({
   weight = 'normal',
   ...props
 }: FluidTextProps<E>) {
-  const Component = as ?? 'p';
+  const Component = (as ?? 'p') as ElementType;
 
-  return (
-    <Component
-      className={cn(
+  return createElement(
+    Component,
+    {
+      className: cn(
         sizeMap[size].size,
         sizeMap[size].lineHeight,
         weightMap[weight],
         className
-      )}
-      {...props}
-    >
-      {children}
-    </Component>
+      ),
+      ...props,
+    },
+    children
   );
 }

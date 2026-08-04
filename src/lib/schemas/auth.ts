@@ -130,7 +130,6 @@ export const authEmailProviderSchema = z
         'Rejects the use of known or easy to guess passwords on sign up or password change. Powered by the HaveIBeenPwned.org Pwned Passwords API.'
       ),
     password_min_length: z
-      .number()
       .int()
       .min(6, 'Must be greater or equal to 6.')
       .describe(
@@ -155,13 +154,11 @@ export const authEmailProviderSchema = z
         'Passwords that do not have at least one of each will be rejected as weak.'
       ),
     mailer_otp_exp: z
-      .number()
       .int()
       .min(0, 'Must be more than 0')
       .max(86400, 'Must be no more than 86400')
       .describe('Duration before an email otp / link expires in seconds.'),
     mailer_otp_length: z
-      .number()
       .int()
       .min(6, 'Must be at least 6')
       .max(10, 'Must be no more than 10')
@@ -209,11 +206,10 @@ export const authPhoneProviderSchema = z
       .optional()
       .describe('Users will need to confirm their phone number before signing in.'),
     sms_otp_exp: z
-      .number()
       .int()
       .optional()
       .describe('Duration before an SMS OTP expires in seconds.'),
-    sms_otp_length: z.number().int().optional().describe('Number of digits in OTP.'),
+    sms_otp_length: z.int().optional().describe('Number of digits in OTP.'),
     sms_template: z
       .string()
       .optional()
@@ -224,9 +220,10 @@ export const authPhoneProviderSchema = z
       .describe(
         'Register phone number and OTP combinations for testing as a comma separated list of <phone number>=<otp> pairs. Example: `18005550123=789012`'
       ),
-    sms_test_otp_valid_until: z
-      .string()
-      .datetime({ message: 'Invalid datetime string.' })
+    sms_test_otp_valid_until: z.iso
+      .datetime({
+        error: 'Invalid datetime string.',
+      })
       .optional()
       .describe(
         "Test phone number and OTP combinations won't be active past this date and time (local time zone)."
@@ -264,7 +261,7 @@ export const authGoogleProviderSchema = authGoogleProviderObject
   .superRefine((data, ctx) => {
     if (data.external_google_enabled && !data.external_google_client_id) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['external_google_client_id'],
         message: 'At least one Client ID is required when Google sign-in is enabled.',
       });
@@ -274,7 +271,7 @@ export const authGoogleProviderSchema = authGoogleProviderObject
       data.external_google_client_id.includes(' ')
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['external_google_client_id'],
         message: 'Client IDs should not contain spaces.',
       });
@@ -284,9 +281,9 @@ export const authGoogleProviderSchema = authGoogleProviderObject
 export type AuthGoogleProviderSchema = z.infer<typeof authGoogleProviderSchema>;
 
 export const authConfigUpdateSchema = authGeneralSettingsSchema
-  .merge(authEmailProviderSchema)
-  .merge(authPhoneProviderSchema)
-  .merge(authGoogleProviderObject);
+  .extend(authEmailProviderSchema.shape)
+  .extend(authPhoneProviderSchema.shape)
+  .extend(authGoogleProviderObject.shape);
 
 export type AuthConfigUpdateSchema = z.infer<typeof authConfigUpdateSchema>;
 

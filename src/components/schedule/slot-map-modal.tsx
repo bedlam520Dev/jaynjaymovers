@@ -1,3 +1,4 @@
+// oxlint-disable typescript/consistent-return
 'use client';
 
 import { useSchedule } from '@/hooks/use-schedule';

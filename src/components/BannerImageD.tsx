@@ -1,3 +1,4 @@
+import { BANNER_DARK } from '@/lib/constants';
 import Image from 'next/image';
 
 export function BannerImageD() {

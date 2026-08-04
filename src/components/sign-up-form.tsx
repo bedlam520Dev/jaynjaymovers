@@ -1,5 +1,6 @@
 'use client';
 
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,7 +15,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn, isValidPhone, normalizePhone } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function SignUpForm({
   className,
@@ -25,8 +26,10 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -64,13 +67,15 @@ export function SignUpForm({
             full_name: fullName.trim(),
             phone: normalizedPhone,
           },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+          captchaToken: captchaToken ?? undefined,
         },
       });
       if (authError) throw authError;
       router.push('/auth/sign-up-success');
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'An error occurred');
+      turnstileRef.current?.reset();
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +151,11 @@ export function SignUpForm({
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
               </div>
+              <TurnstileWidget
+                ref={turnstileRef}
+                action='auth-sign-up'
+                onTokenChange={setCaptchaToken}
+              />
               {formError && <p className='text-sm text-red-500'>{formError}</p>}
               <Button
                 type='submit'

@@ -81,9 +81,9 @@ minimumReleaseAgeExclude:
 overrides:
   '@storybook/addon-essentials>uuid': '^14.0.1'
   'uuid': '^14.0.1'
-  'next>postcss': '^8.5.22'
-  '@tailwindcss/postcss>postcss': '^8.5.22'
-  'postcss': '^8.5.22'
+  'next>postcss': '^8.5.25'
+  '@tailwindcss/postcss>postcss': '^8.5.25'
+  'postcss': '^8.5.25'
   'postcss>nanoid': '^6.0.0'
   'nanoid': '^6.0.0'
   'next>@swc/helpers': '0.5.23'

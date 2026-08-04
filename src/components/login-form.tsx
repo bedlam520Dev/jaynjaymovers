@@ -1,5 +1,6 @@
 'use client';
 
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,7 +15,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function LoginForm({
   className,
@@ -22,8 +23,10 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,12 +39,14 @@ export function LoginForm({
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken: captchaToken ?? undefined },
       });
       if (authError) throw authError;
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push('/dashboard');
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'An error occurred');
+      turnstileRef.current?.reset();
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +96,11 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+              <TurnstileWidget
+                ref={turnstileRef}
+                action='auth-login'
+                onTokenChange={setCaptchaToken}
+              />
               {formError && <p className='text-sm text-red-500'>{formError}</p>}
               <Button
                 type='submit'

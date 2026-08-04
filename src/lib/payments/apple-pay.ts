@@ -1,7 +1,7 @@
 import type { ProviderConfig, ProviderStatus } from './types';
 
-const MERCHANT_ID = process.env.APPLE_PAY_MERCHANT_ID;
-const MERCHANT_DOMAIN = process.env.APPLE_PAY_MERCHANT_DOMAIN;
+const MERCHANT_ID = process.env.NEXT_PUBLIC_APPLE_PAY_MERCHANT_ID;
+const MERCHANT_DOMAIN = process.env.NEXT_PUBLIC_APPLE_PAY_MERCHANT_DOMAIN;
 const CERTIFICATE = process.env.APPLE_PAY_CERTIFICATE;
 
 export function getStatus(): ProviderStatus {

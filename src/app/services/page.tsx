@@ -1,5 +1,4 @@
 import { Container, Section, Grid, Stack } from '@/components/layout';
-import { ArrowRightIcon } from '@/components/ui/arrow-right';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +9,8 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
-import { CircleCheckIcon } from '@/components/ui/circle-check';
-import { FilePenLineIcon } from '@/components/ui/file-pen-line';
+import { ArrowRightIcon } from '@/components/ui/lucide-animated/arrow-right';
+import { FilePenLineIcon } from '@/components/ui/lucide-animated/file-pen-line';
 import { services, whyChooseUs } from '@/lib/constants';
 import { formatCurrency } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -111,7 +110,7 @@ export default function ServicesPage() {
                           key={feature}
                           className='flex items-start gap-2 text-sm'
                         >
-                          <CircleCheckIcon className='text-accent mt-0.5 h-4 w-4 shrink-0' />
+                          <Icon className='text-accent mt-0.5 h-4 w-4 shrink-0' />
                           <span className='text-muted-foreground'>{feature}</span>
                         </li>
                       ))}
@@ -136,7 +135,7 @@ export default function ServicesPage() {
                       nativeButton={false}
                     >
                       Get a quote
-                      <ArrowRightIcon className='ml-1' />
+                      <Icon className='ml-1' />
                     </Button>
                   </CardFooter>
                 </Card>

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { createElement } from 'react';
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 type StackProps<E extends ElementType = 'div'> = {
@@ -43,21 +44,21 @@ export function Stack<E extends ElementType = 'div'>({
   wrap = false,
   ...props
 }: StackProps<E>) {
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as ElementType;
 
-  return (
-    <Component
-      className={cn(
+  return createElement(
+    Component,
+    {
+      className: cn(
         'flex flex-col',
         gapMap[gap],
         alignMap[align],
         justifyMap[justify],
         wrap && 'flex-wrap',
         className
-      )}
-      {...props}
-    >
-      {children}
-    </Component>
+      ),
+      ...props,
+    },
+    children
   );
 }

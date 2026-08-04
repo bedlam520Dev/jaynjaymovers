@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { MoonIcon } from '@/components/ui/moon';
-import { SunIcon } from '@/components/ui/sun';
+import { MoonIcon } from '@/components/ui/lucide-animated/moon';
+import { SunIcon } from '@/components/ui/lucide-animated/sun';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
 

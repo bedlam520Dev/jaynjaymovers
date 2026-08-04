@@ -49,11 +49,9 @@
     ".storybook/**/*",
     ".vscode/**/*",
     ".kilo/**/*",
-    "src/components/**/*",
     ".opencode/**/*",
     "playwright-report/**/*",
     "test-results/**/*",
-    "supabase/**/*",
     "src/lib/__tests__/**/*"
   ]
 }

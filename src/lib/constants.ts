@@ -33,6 +33,7 @@ import {
   Building2,
   TrendingUp,
   MapPin,
+  type LucideIcon,
 } from 'lucide-react';
 
 const getBaseUrl = (): string => {
@@ -566,7 +567,7 @@ export const sourceOrder: Record<string, number> = {
   internal: 3,
 } as const;
 
-export const SERVICE_OPTIONS: { key: ServiceType; icon: React.ElementType }[] = [
+export const SERVICE_OPTIONS: { key: ServiceType; icon: LucideIcon }[] = [
   { key: 'residential', icon: Home },
   { key: 'commercial', icon: Building },
   { key: 'long_distance', icon: Truck },

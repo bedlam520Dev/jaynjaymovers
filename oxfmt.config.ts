@@ -8,7 +8,7 @@ export default defineConfig({
   bracketSpacing: true,
   embeddedLanguageFormatting: 'auto',
   endOfLine: 'lf',
-  experimentalSortImports: {
+  sortImports: {
     groups: [
       ['builtin'],
       ['external'],
@@ -24,9 +24,11 @@ export default defineConfig({
     partitionByNewline: false,
     sortSideEffects: true,
   },
-  experimentalSortPackageJson: true,
+  sortPackageJson: true,
+  sortTailwindcss: {
+    stylesheet: "./src/app/globals.css",
+  },
   ignorePatterns: [
-    'src/components/ui/*',
     '_dev/**/*',
     '_devlogs/**/*',
     '.next/**/*',
@@ -57,7 +59,8 @@ export default defineConfig({
     'test-results/**/*',
     'supabase/**/*',
     'src/lib/supabase/**/*',
-    'src/lib/__tests__',
+    'src/lib/__tests__/**/*',
+    'src/components/ui/**/*',
   ],
   insertFinalNewline: true,
   jsxSingleQuote: true,

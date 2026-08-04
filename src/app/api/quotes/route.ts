@@ -1,13 +1,21 @@
 import { calculateEstimate } from '@/lib/pricing';
 import { quoteSchema } from '@/lib/schemas/api';
 import { createClient } from '@/lib/supabase/server';
-import type { ServiceType, HomeSize } from '@/types';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = quoteSchema.parse(body);
+
+    const ok = await verifyTurnstileToken(body.turnstile_token);
+    if (!ok) {
+      return NextResponse.json(
+        { error: 'Security check failed. Please try again.' },
+        { status: 403 }
+      );
+    }
 
     const estimate = calculateEstimate(validated.service_type, validated.home_size);
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { TurnstileWidget } from '@/components/turnstile/turnstile-widget';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,16 +14,18 @@ import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const turnstileRef = useRef<{ reset: () => void }>(null);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +36,14 @@ export function ForgotPasswordForm({
     try {
       // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: `${window.location.origin}/auth/confirm?next=/auth/update-password`,
+        captchaToken: captchaToken ?? undefined,
       });
       if (authError) throw authError;
       setSuccess(true);
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'An error occurred');
+      turnstileRef.current?.reset();
     } finally {
       setIsLoading(false);
     }
@@ -84,6 +89,11 @@ export function ForgotPasswordForm({
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
+                <TurnstileWidget
+                  ref={turnstileRef}
+                  action='auth-forgot-password'
+                  onTokenChange={setCaptchaToken}
+                />
                 {formError && <p className='text-sm text-red-500'>{formError}</p>}
                 <Button
                   type='submit'

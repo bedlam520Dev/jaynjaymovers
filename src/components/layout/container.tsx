@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { createElement } from 'react';
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
@@ -27,20 +28,20 @@ export function Container<E extends ElementType = 'div'>({
   fluid = false,
   ...props
 }: ContainerProps<E>) {
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as ElementType;
 
-  return (
-    <Component
-      className={cn(
+  return createElement(
+    Component,
+    {
+      className: cn(
         '@container',
         'mx-auto',
         fluid ? 'w-full' : sizeMap[size],
         'px-(--container-padding-x)',
         className
-      )}
-      {...props}
-    >
-      {children}
-    </Component>
+      ),
+      ...props,
+    },
+    children
   );
 }

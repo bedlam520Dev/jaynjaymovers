@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { createElement } from 'react';
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 type GridBreakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
@@ -82,7 +83,7 @@ export function Grid<E extends ElementType = 'div'>({
   minColWidth = '16rem',
   ...props
 }: GridProps<E>) {
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as ElementType;
 
   let colsClassName = '';
   if (typeof cols === 'number') {
@@ -102,17 +103,15 @@ export function Grid<E extends ElementType = 'div'>({
     colsClassName = classes.join(' ');
   }
 
-  return (
-    <Component
-      className={cn('grid', !autoFit && colsClassName, gapMap[gap], className)}
-      style={
-        autoFit
-          ? { gridTemplateColumns: `repeat(auto-fit, minmax(${minColWidth}, 1fr))` }
-          : undefined
-      }
-      {...props}
-    >
-      {children}
-    </Component>
+  return createElement(
+    Component,
+    {
+      className: cn('grid', !autoFit && colsClassName, gapMap[gap], className),
+      style: autoFit
+        ? { gridTemplateColumns: `repeat(auto-fit, minmax(${minColWidth}, 1fr))` }
+        : undefined,
+      ...props,
+    },
+    children
   );
 }

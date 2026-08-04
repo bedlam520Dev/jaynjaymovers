@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuthModal } from '@/components/auth-modals/AuthModalProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -11,7 +10,6 @@ import { useState } from 'react';
 
 export function LandingSignIn() {
   const { user, profile, signOut } = useAuth();
-  const { openLogin } = useAuthModal();
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -137,12 +135,13 @@ export function LandingSignIn() {
               </>
             ) : (
               <div className='flex flex-col gap-1.5 pt-0.5'>
-                <button
-                  onClick={openLogin}
+                <Link
+                  href='/auth/login'
+                  onClick={() => setMenuOpen(false)}
                   className='flex h-9 w-full items-center justify-center rounded-lg border border-muted bg-background/60 text-sm font-medium transition-all hover:scale-[1.01] hover:border-primary/80 hover:bg-background/80 active:scale-98'
                 >
                   Sign In
-                </button>
+                </Link>
               </div>
             )}
 

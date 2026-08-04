@@ -140,6 +140,8 @@ export default defineConfig({
           '__text',
           '__key',
           '__className',
+          '__NEXT_BASE_PATH__',
+          '__TRAILING_SLASH__',
         ],
       },
     ],
@@ -170,7 +172,6 @@ export default defineConfig({
     NodeJS: 'readonly',
   },
   ignorePatterns: [
-    'src/components/ui/*',
     '_dev/**/*',
     '_devlogs/**/*',
     '.next/**/*',
@@ -201,6 +202,7 @@ export default defineConfig({
     'test-results/**/*',
     'supabase/**/*',
     'src/lib/supabase/**/*',
-    'src/lib/__tests__',
+    'src/lib/__tests__/**/*',
+    'src/components/ui/**/*',
   ],
 });
